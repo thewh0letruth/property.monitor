@@ -1,11 +1,11 @@
 """
-AUTOMATED PROPERTY MONITORING SERVICE - FIXED ZIP TRACKING
+AUTOMATED PROPERTY MONITORING SERVICE - NO PANDAS VERSION
 """
 
 import requests
-import pandas as pd
 import json
 import time
+import csv
 from datetime import datetime, timedelta
 import smtplib
 from email.mime.text import MIMEText
@@ -158,6 +158,27 @@ class PropertyMonitor:
         
         self.save_json(self.properties_file, self.tracked_properties)
         return []
+    
+    def generate_report(self, changes):
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        csv_file = f"reports/changes_{timestamp}.csv"
+        
+        with open(csv_file, 'w', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(['Date', 'Address', 'Field', 'Old Value', 'New Value'])
+            
+            for change in changes:
+                for c in change['changes']:
+                    writer.writerow([
+                        change['detected_date'],
+                        change['property_address'],
+                        c['field'],
+                        c['old_value'],
+                        c['new_value']
+                    ])
+        
+        logger.info(f"✓ Report generated: {csv_file}")
+        return csv_file
 
 
 if __name__ == "__main__":
